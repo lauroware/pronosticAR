@@ -64,13 +64,6 @@ const App = () => (
   </BrowserRouter>
 );
 
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://pronosticar.netlify.app',
-    'https://pronosticar.latinnexo.com.ar'  // ← agregá esta línea
-  ],
-  credentials: true
-}));
+
 
 export default App;
