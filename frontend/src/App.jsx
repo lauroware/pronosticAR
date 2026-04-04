@@ -31,15 +31,18 @@ const ToastContainer = () => {
 
 const AppLayout = () => {
   const { usuario, cargando } = useAuth();
-  if (cargando) return null;
+  if (cargando) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
   if (!usuario) return <AppRoutes />;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
-      <div className="flex-1 max-w-6xl mx-auto w-full px-4 py-6 flex gap-6">
-        <Sidebar />
-        <main className="flex-1 min-w-0">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+        <main className="animate-fade-up">
           <AppRoutes />
         </main>
       </div>

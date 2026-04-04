@@ -8,5 +8,6 @@ router.use('/pronosticos', require('./pronosticoRoutes'));
 router.use('/grupos',      require('./grupoRoutes'));
 router.use('/rankings',    require('./rankingRoutes'));
 router.use('/admin',       require('./adminRoutes'));
+router.use('/novedades', require('./novedadRoutes'));
 
 module.exports = router;

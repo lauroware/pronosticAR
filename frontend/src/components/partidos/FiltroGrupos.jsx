@@ -1,4 +1,4 @@
-const GRUPOS = ['A','B','C','D','E','F'];
+const GRUPOS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
 const FiltroGrupos = ({ activo, onChange }) => (
   <div className="flex gap-2 flex-wrap">
@@ -14,4 +14,5 @@ const FiltroGrupos = ({ activo, onChange }) => (
     ))}
   </div>
 );
+
 export default FiltroGrupos;

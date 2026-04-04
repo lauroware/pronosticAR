@@ -1,4 +1,5 @@
 const medallas = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
 const MedallaPuesto = ({ posicion, size = 'md' }) => {
   const sizes = { sm: 'text-lg', md: 'text-2xl', lg: 'text-4xl' };
   return (
@@ -7,4 +8,5 @@ const MedallaPuesto = ({ posicion, size = 'md' }) => {
     </span>
   );
 };
+
 export default MedallaPuesto;

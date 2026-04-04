@@ -1,5 +1,7 @@
 const { Grupo, MiembroGrupo, RankingGrupos } = require('../models');
 
+// ========== FUNCIONES ==========
+
 // POST /api/grupos
 const crearGrupo = async (req, res, next) => {
   try {
@@ -8,7 +10,6 @@ const crearGrupo = async (req, res, next) => {
       nombre, descripcion, torneo: torneoId,
       limiteMembers, esPrivado, creador: req.usuario._id,
     });
-    // El creador es admin del grupo
     await MiembroGrupo.create({ grupo: grupo._id, usuario: req.usuario._id, rol: 'admin' });
     res.status(201).json({ ok: true, data: grupo });
   } catch (error) { next(error); }
@@ -38,8 +39,7 @@ const unirseAGrupo = async (req, res, next) => {
 // GET /api/grupos/mis-grupos
 const getMisGrupos = async (req, res, next) => {
   try {
-    const membresias = await MiembroGrupo.find({ usuario: req.usuario._id, activo: true })
-      .populate('grupo');
+    const membresias = await MiembroGrupo.find({ usuario: req.usuario._id, activo: true }).populate('grupo');
     const grupos = membresias.map((m) => ({ ...m.grupo.toObject(), rolEnGrupo: m.rol }));
     res.json({ ok: true, data: grupos });
   } catch (error) { next(error); }
@@ -64,4 +64,38 @@ const getMiembros = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-module.exports = { crearGrupo, unirseAGrupo, getMisGrupos, getGrupo, getMiembros };
+// PUT /api/grupos/:id/personalizar
+const actualizarPersonalizacion = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { imagenPortada, avatar, colorPrimario, colorSecundario, reglas, bienvenida } = req.body;
+    
+    const grupo = await Grupo.findById(id);
+    if (!grupo) return res.status(404).json({ ok: false, mensaje: 'Grupo no encontrado' });
+    
+    const esAdmin = await MiembroGrupo.findOne({ grupo: id, usuario: req.usuario._id, rol: 'admin' });
+    if (!esAdmin && req.usuario.rol !== 'admin') {
+      return res.status(403).json({ ok: false, mensaje: 'Solo el administrador puede personalizar el grupo' });
+    }
+    
+    if (imagenPortada !== undefined) grupo.imagenPortada = imagenPortada;
+    if (avatar !== undefined) grupo.avatar = avatar;
+    if (colorPrimario !== undefined) grupo.colorPrimario = colorPrimario;
+    if (colorSecundario !== undefined) grupo.colorSecundario = colorSecundario;
+    if (reglas !== undefined) grupo.reglas = reglas;
+    if (bienvenida !== undefined) grupo.bienvenida = bienvenida;
+    
+    await grupo.save();
+    res.json({ ok: true, data: grupo });
+  } catch (error) { next(error); }
+};
+
+// ========== EXPORTAR ==========
+module.exports = {
+  crearGrupo,
+  unirseAGrupo,
+  getMisGrupos,
+  getGrupo,
+  getMiembros,
+  actualizarPersonalizacion,
+};

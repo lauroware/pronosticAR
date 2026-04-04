@@ -1,12 +1,57 @@
-const { Grupo, MiembroGrupo } = require('../models');
+const { RankingGlobal, RankingGrupos, MiembroGrupo } = require('../models');
 
-const esMiembro = async (grupoId, usuarioId) =>
-  !!(await MiembroGrupo.findOne({ grupo: grupoId, usuario: usuarioId, activo: true }));
+const recalcularGlobal = async (torneoId) => {
+  const rankings = await RankingGlobal.find({ torneo: torneoId })
+    .sort({ puntaje: -1, 'desglose.exactos': -1 });
 
-const esAdmin = async (grupoId, usuarioId) =>
-  !!(await MiembroGrupo.findOne({ grupo: grupoId, usuario: usuarioId, rol: 'admin', activo: true }));
+  const bulk = rankings.map((r, i) => ({
+    updateOne: {
+      filter: { _id: r._id },
+      update: { posicionAnterior: r.posicion, posicion: i + 1, actualizadoAt: new Date() },
+    },
+  }));
 
-const obtenerGruposDeUsuario = async (usuarioId) =>
-  MiembroGrupo.find({ usuario: usuarioId, activo: true }).populate('grupo');
+  if (bulk.length) await RankingGlobal.bulkWrite(bulk);
+};
 
-module.exports = { esMiembro, esAdmin, obtenerGruposDeUsuario };
+const recalcularGrupos = async (torneoId) => {
+  const { Grupo } = require('../models');
+  const grupos = await Grupo.find({ torneo: torneoId, activo: true });
+
+  for (const grupo of grupos) {
+    const miembros = await MiembroGrupo.find({ grupo: grupo._id, activo: true })
+      .sort({ puntajeEnGrupo: -1 });
+
+    const bulk = miembros.map((m, i) => ({
+      updateOne: {
+        filter: { _id: m._id },
+        update: { posicion: i + 1 },
+      },
+    }));
+
+    if (bulk.length) await MiembroGrupo.bulkWrite(bulk);
+
+    const puntajeTotal = miembros.reduce((acc, m) => acc + m.puntajeEnGrupo, 0);
+    const promedio = miembros.length ? puntajeTotal / miembros.length : 0;
+
+    await RankingGrupos.findOneAndUpdate(
+      { torneo: torneoId, grupo: grupo._id },
+      { puntajeTotal, promedioPorMiembro: promedio, cantidadMiembros: miembros.length, actualizadoAt: new Date() },
+      { upsert: true }
+    );
+  }
+
+  const rankingsGrupos = await RankingGrupos.find({ torneo: torneoId })
+    .sort({ promedioPorMiembro: -1 });
+
+  const bulk = rankingsGrupos.map((r, i) => ({
+    updateOne: {
+      filter: { _id: r._id },
+      update: { posicionAnterior: r.posicion, posicion: i + 1 },
+    },
+  }));
+
+  if (bulk.length) await RankingGrupos.bulkWrite(bulk);
+};
+
+module.exports = { recalcularGlobal, recalcularGrupos };

@@ -10,6 +10,8 @@ import GrupoDetail from './pages/GrupoDetail';
 import Rankings from './pages/Rankings';
 import MiPerfil from './pages/MiPerfil';
 import AdminPanel from './pages/AdminPanel';
+import Novedades from './pages/Novedades';
+import Fixture from './pages/Fixture';
 
 const AppRoutes = () => (
   <Routes>
@@ -24,6 +26,8 @@ const AppRoutes = () => (
     <Route path="/rankings"        element={<PrivateRoute><Rankings /></PrivateRoute>} />
     <Route path="/perfil"          element={<PrivateRoute><MiPerfil /></PrivateRoute>} />
     <Route path="/admin"           element={<PrivateRoute soloAdmin><AdminPanel /></PrivateRoute>} />
+    <Route path="/novedades" element={<PrivateRoute><Novedades /></PrivateRoute>} />
+<Route path="/fixture" element={<PrivateRoute><Fixture /></PrivateRoute>} />
 
     <Route path="/" element={<Navigate to="/dashboard" replace />} />
     <Route path="*" element={<Navigate to="/dashboard" replace />} />

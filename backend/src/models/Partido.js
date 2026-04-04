@@ -17,10 +17,10 @@ const partidoSchema = new mongoose.Schema(
       required: true,
     },
     fase: {
-      type: String,
-      enum: ['grupos', 'octavos', 'cuartos', 'semifinal', 'tercer_puesto', 'final'],
-      required: true,
-    },
+  type: String,
+  enum: ['grupos', 'dieciseisavos', 'octavos', 'cuartos', 'semifinal', 'tercer_puesto', 'final'],
+  required: true,
+},
     grupoFase: {
       // Solo para fase 'grupos': A, B, C ... H
       type: String,

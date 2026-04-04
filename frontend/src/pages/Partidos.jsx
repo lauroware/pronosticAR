@@ -2,20 +2,26 @@ import { useState, useEffect } from 'react';
 import usePartidos from '../hooks/usePartidos';
 import { getMisPronosticos } from '../services/pronosticoService';
 import Calendario from '../components/partidos/Calendario';
-import FiltroGrupos from '../components/partidos/FiltroGrupos';
+import GruposLista from '../components/partidos/GruposLista';
 import Loading from '../components/common/Loading';
 
 const ESTADOS = [
   { valor: 'programado', label: 'Próximos' },
   { valor: 'finalizado', label: 'Finalizados' },
-  { valor: '',           label: 'Todos' },
+  { valor: '', label: 'Todos' },
 ];
 
 const Partidos = () => {
   const [estado, setEstado] = useState('programado');
-  const [grupo, setGrupo]   = useState(null);
-  const filtros = { ...(estado && { estado }), ...(grupo && { grupoFase: grupo }) };
-  const { partidos, cargando, setPartidos } = usePartidos(filtros);
+  const [grupo, setGrupo] = useState(null);
+  
+  const filtros = { 
+    ...(estado && { estado }), 
+    ...(grupo && { grupoFase: grupo }),
+    limit: 100  // Para que traiga todos
+  };
+  
+  const { partidos, cargando } = usePartidos(filtros);
   const [pronosticos, setPronosticos] = useState([]);
 
   useEffect(() => {
@@ -31,9 +37,10 @@ const Partidos = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-2xl font-bold text-gray-900">⚽ Partidos</h1>
+      <h1 className="text-2xl font-bold text-gray-900">⚽ Partidos Mundial 2026</h1>
 
-      <div className="flex gap-2">
+      {/* Selector de estado */}
+      <div className="flex gap-2 flex-wrap">
         {ESTADOS.map(({ valor, label }) => (
           <button key={label} onClick={() => setEstado(valor)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
@@ -44,12 +51,15 @@ const Partidos = () => {
         ))}
       </div>
 
-      <FiltroGrupos activo={grupo} onChange={setGrupo} />
+      {/* Grupos con equipos */}
+      <GruposLista grupoSeleccionado={grupo} onSelectGrupo={setGrupo} />
 
+      {/* Calendario de partidos */}
       {cargando ? <Loading /> : (
         <Calendario partidos={partidos} pronosticos={pronosticos} onPronosticoGuardado={handlePronosticoGuardado} />
       )}
     </div>
   );
 };
+
 export default Partidos;

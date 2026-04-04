@@ -4,19 +4,28 @@ const { procesarResultadoPartido } = require('../services/puntuacionService');
 // GET /api/partidos?torneo=id&fase=grupos&estado=programado
 const getPartidos = async (req, res, next) => {
   try {
-    const { torneo, fase, estado, page = 1, limit = 20 } = req.query;
+    const { torneo, fase, estado, grupoFase, page = 1, limit = 20 } = req.query;
     const filtro = {};
-    if (torneo)  filtro.torneo = torneo;
-    if (fase)    filtro.fase = fase;
-    if (estado)  filtro.estado = estado;
+    
+    if (torneo) filtro.torneo = torneo;
+    if (fase) filtro.fase = fase;
+    if (estado) filtro.estado = estado;
+    if (grupoFase) filtro.grupoFase = grupoFase;  // ← ESTA LÍNEA ES LA CLAVE
+
+    console.log('🔍 Filtro recibido en backend:', filtro); // Para debug
 
     const [partidos, total] = await Promise.all([
-      Partido.find(filtro).sort({ fechaHora: 1 }).skip((page - 1) * limit).limit(Number(limit)),
+      Partido.find(filtro)
+        .sort({ fechaHora: 1 })
+        .skip((page - 1) * limit)
+        .limit(Number(limit)),
       Partido.countDocuments(filtro),
     ]);
 
     res.json({ ok: true, data: partidos, meta: { total, page: Number(page), limit: Number(limit) } });
-  } catch (error) { next(error); }
+  } catch (error) { 
+    next(error); 
+  }
 };
 
 // GET /api/partidos/:id
