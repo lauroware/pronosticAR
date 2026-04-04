@@ -1,0 +1,2 @@
+const log = (level, msg, meta = '') => console[level === 'error' ? 'error' : 'log'](`[${level.toUpperCase()}] ${msg}`, meta);
+module.exports = { info: (m, d) => log('info', m, d), error: (m, d) => log('error', m, d), warn: (m, d) => log('warn', m, d) };
