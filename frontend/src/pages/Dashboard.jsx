@@ -139,7 +139,7 @@ const Dashboard = () => {
 
       {/* ── BANNER MERCH ── */}
       <a
-        href="https://latinmerch.com.ar"
+        href="https://latinmerch.com.ar/mundial2026.html"
         target="_blank"
         rel="noreferrer"
         className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-600/20 to-yellow-600/20 hover:from-orange-600/30 hover:to-yellow-600/30 transition-all duration-200 hover:scale-[1.01]"

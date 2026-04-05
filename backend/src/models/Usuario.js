@@ -1,71 +1,37 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const bcrypt   = require('bcryptjs');
 
 const usuarioSchema = new mongoose.Schema(
   {
     nombre: {
-      type: String,
-      required: [true, 'El nombre es obligatorio'],
-      trim: true,
-      minlength: [2, 'El nombre debe tener al menos 2 caracteres'],
-      maxlength: [50, 'El nombre no puede superar los 50 caracteres'],
+      type: String, required: [true, 'El nombre es obligatorio'],
+      trim: true, minlength: 2, maxlength: 50,
     },
     apellido: {
-      type: String,
-      required: [true, 'El apellido es obligatorio'],
-      trim: true,
-      minlength: [2, 'El apellido debe tener al menos 2 caracteres'],
-      maxlength: [50, 'El apellido no puede superar los 50 caracteres'],
+      type: String, required: [true, 'El apellido es obligatorio'],
+      trim: true, minlength: 2, maxlength: 50,
     },
     username: {
-      type: String,
-      required: [true, 'El username es obligatorio'],
-      unique: true,
-      trim: true,
-      lowercase: true,
-      minlength: [3, 'El username debe tener al menos 3 caracteres'],
-      maxlength: [30, 'El username no puede superar los 30 caracteres'],
-      match: [/^[a-z0-9_.-]+$/, 'El username solo puede contener letras, números, guiones y puntos'],
+      type: String, required: [true, 'El username es obligatorio'],
+      unique: true, trim: true, lowercase: true,
+      minlength: 3, maxlength: 30,
+      match: [/^[a-z0-9_.-]+$/, 'Username inválido'],
     },
     email: {
-      type: String,
-      required: [true, 'El email es obligatorio'],
-      unique: true,
-      trim: true,
-      lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, 'Formato de email inválido'],
+      type: String, required: [true, 'El email es obligatorio'],
+      unique: true, trim: true, lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, 'Email inválido'],
     },
     password: {
-      type: String,
-      required: [true, 'La contraseña es obligatoria'],
-      minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
-      select: false,
+      type: String, required: true, minlength: 6, select: false,
     },
-    avatar: {
-      type: String,
-      default: null,
-    },
-    rol: {
-      type: String,
-      enum: ['usuario', 'admin'],
-      default: 'usuario',
-    },
-    activo: {
-      type: Boolean,
-      default: true,
-    },
-    emailVerificado: {
-      type: Boolean,
-      default: false,
-    },
-    tokenResetPassword: {
-      type: String,
-      select: false,
-    },
-    tokenResetExpira: {
-      type: Date,
-      select: false,
-    },
+    avatar:          { type: String, default: null },
+    rol:             { type: String, enum: ['usuario', 'admin'], default: 'usuario' },
+    activo:          { type: Boolean, default: true },
+    emailVerificado: { type: Boolean, default: false },
+    tokenResetPassword: { type: String, select: false },
+    tokenResetExpira:   { type: Date,   select: false },
+
     stats: {
       totalPronosticos: { type: Number, default: 0 },
       aciertosExactos:  { type: Number, default: 0 },
@@ -73,15 +39,27 @@ const usuarioSchema = new mongoose.Schema(
       fallos:           { type: Number, default: 0 },
       puntajeTotal:     { type: Number, default: 0 },
     },
+
+    // ── PRONÓSTICO FINAL (elegido al registrarse, no editable) ───────────
+    // Cada posición guarda el código FIFA del equipo elegido (ej: 'ARG')
+    pronosticoFinal: {
+      campeon:  { type: String, default: null, uppercase: true, maxlength: 3 },
+      segundo:  { type: String, default: null, uppercase: true, maxlength: 3 },
+      tercero:  { type: String, default: null, uppercase: true, maxlength: 3 },
+      cuarto:   { type: String, default: null, uppercase: true, maxlength: 3 },
+      // Se bloquea automáticamente cuando el usuario guarda los 4
+      bloqueado: { type: Boolean, default: false },
+      // Puntos acumulados por aciertos del pronóstico final
+      puntosObtenidos: { type: Number, default: 0 },
+    },
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
+    toJSON:   { virtuals: true },
     toObject: { virtuals: true },
   }
 );
 
-// ------- Virtuals -------
 usuarioSchema.virtual('nombreCompleto').get(function () {
   return `${this.nombre} ${this.apellido}`;
 });
@@ -92,7 +70,6 @@ usuarioSchema.virtual('efectividad').get(function () {
   return Math.round(((this.stats.aciertosExactos + this.stats.aciertosGanador) / resueltos) * 100);
 });
 
-// ------- Middleware -------
 usuarioSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(12);
@@ -100,27 +77,26 @@ usuarioSchema.pre('save', async function (next) {
   next();
 });
 
-// ------- Métodos de instancia -------
-usuarioSchema.methods.compararPassword = async function (passwordIngresada) {
-  return bcrypt.compare(passwordIngresada, this.password);
+usuarioSchema.methods.compararPassword = async function (pw) {
+  return bcrypt.compare(pw, this.password);
 };
 
 usuarioSchema.methods.toPublicJSON = function () {
   return {
-    id: this._id,
-    nombre: this.nombre,
-    apellido: this.apellido,
-    username: this.username,
-    email: this.email,
-    avatar: this.avatar,
-    rol: this.rol,
-    stats: this.stats,
-    efectividad: this.efectividad,
-    createdAt: this.createdAt,
+    id:               this._id,
+    nombre:           this.nombre,
+    apellido:         this.apellido,
+    username:         this.username,
+    email:            this.email,
+    avatar:           this.avatar,
+    rol:              this.rol,
+    stats:            this.stats,
+    efectividad:      this.efectividad,
+    pronosticoFinal:  this.pronosticoFinal,
+    createdAt:        this.createdAt,
   };
 };
 
-// ------- Índices -------
 usuarioSchema.index({ email: 1 });
 usuarioSchema.index({ username: 1 });
 usuarioSchema.index({ 'stats.puntajeTotal': -1 });
