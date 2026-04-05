@@ -12,6 +12,7 @@ import MiPerfil from './pages/MiPerfil';
 import AdminPanel from './pages/AdminPanel';
 import Novedades from './pages/Novedades';
 import Fixture from './pages/Fixture';
+import PagoExitoso from './pages/PagoExitoso';
 
 const AppRoutes = () => (
   <Routes>
@@ -26,11 +27,16 @@ const AppRoutes = () => (
     <Route path="/rankings"        element={<PrivateRoute><Rankings /></PrivateRoute>} />
     <Route path="/perfil"          element={<PrivateRoute><MiPerfil /></PrivateRoute>} />
     <Route path="/admin"           element={<PrivateRoute soloAdmin><AdminPanel /></PrivateRoute>} />
-    <Route path="/novedades" element={<PrivateRoute><Novedades /></PrivateRoute>} />
-<Route path="/fixture" element={<PrivateRoute><Fixture /></PrivateRoute>} />
+    <Route path="/novedades"       element={<PrivateRoute><Novedades /></PrivateRoute>} />
+    <Route path="/fixture"         element={<PrivateRoute><Fixture /></PrivateRoute>} />
 
-    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    {/* Pago */}
+    <Route path="/pago/exitoso"    element={<PrivateRoute><PagoExitoso /></PrivateRoute>} />
+    <Route path="/pago/fallido"    element={<Navigate to="/grupos" replace />} />
+    <Route path="/pago/pendiente"  element={<Navigate to="/grupos" replace />} />
+
+    <Route path="/"  element={<Navigate to="/dashboard" replace />} />
+    <Route path="*"  element={<Navigate to="/dashboard" replace />} />
   </Routes>
 );
 

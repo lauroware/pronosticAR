@@ -1,23 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getGrupo, getMiembros } from '../../services/grupoService';
-import { getRankingGrupo } from '../../services/rankingService';
-import RankingInterno from '../rankings/RankingInterno';
-import InvitacionModal from './InvitacionModal';
-import MiembrosList from './MiembrosList';
-import Loading from '../common/Loading';
-import useNotificaciones from '../../hooks/useNotificaciones';
-import Button from '../common/Button';
+import { getGrupo, getMiembros } from '../services/grupoService';
+import RankingInterno from '../components/rankings/RankingInterno';
+import InvitacionModal from '../components/grupos/InvitacionModal';
+import UpgradeModal from '../components/grupos/UpgradeModal';
+import Loading from '../components/common/Loading';
+import useNotificaciones from '../hooks/useNotificaciones';
+import useAuth from '../hooks/useAuth';
+import Button from '../components/common/Button';
 
 const GrupoDetail = () => {
-  const { id } = useParams();
-  const [grupo, setGrupo] = useState(null);
-  const [miembros, setMiembros] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const { id }                        = useParams();
+  const { usuario }                   = useAuth();
+  const [grupo, setGrupo]             = useState(null);
+  const [miembros, setMiembros]       = useState([]);
+  const [cargando, setCargando]       = useState(true);
   const [modalInvitacion, setModalInvitacion] = useState(false);
-  const { error } = useNotificaciones();
+  const [modalUpgrade, setModalUpgrade]       = useState(false);
+  const { error }                     = useNotificaciones();
 
-  useEffect(() => {
+  const cargar = () => {
     Promise.all([getGrupo(id), getMiembros(id)])
       .then(([{ data: g }, { data: m }]) => {
         setGrupo(g.data);
@@ -25,58 +27,106 @@ const GrupoDetail = () => {
       })
       .catch(() => error('No se pudo cargar el grupo'))
       .finally(() => setCargando(false));
-  }, [id, error]);
+  };
+
+  useEffect(() => { cargar(); }, [id]);
 
   if (cargando) return <Loading />;
-  if (!grupo) return <div className="text-center py-12 text-gray-400">Grupo no encontrado</div>;
+  if (!grupo)   return <div className="text-center py-12 text-gray-400">Grupo no encontrado</div>;
+
+  const esAdmin     = grupo.creador?._id === usuario?.id || grupo.rolEnGrupo === 'admin';
+  const limiteActual = grupo.premium ? 50 : 5;
+  const grupoLleno  = grupo.cantidadMiembros >= limiteActual;
 
   return (
     <div className="flex flex-col gap-5">
+
       {/* Header del grupo */}
       <div className="bg-gradient-to-r from-blue-900 to-blue-700 text-white rounded-2xl p-6">
-        <div className="flex items-start justify-between flex-wrap gap-4">
+        <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-3xl">
-              👥
-            </div>
+            {grupo.imagen ? (
+              <img src={grupo.imagen} alt={grupo.nombre}
+                className="w-16 h-16 rounded-full object-cover border-2 border-white/30" />
+            ) : (
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-3xl">
+                👥
+              </div>
+            )}
             <div>
-              <h1 className="text-2xl font-bold">{grupo.nombre}</h1>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl font-bold">{grupo.nombre}</h1>
+                {/* Badge premium discreto */}
+                {grupo.premium && (
+                  <span className="text-xs bg-yellow-400/20 border border-yellow-400/40 text-yellow-300 px-2 py-0.5 rounded-full">
+                    ⭐ Premium
+                  </span>
+                )}
+              </div>
               {grupo.descripcion && (
                 <p className="text-blue-200 text-sm mt-1">{grupo.descripcion}</p>
               )}
-              <div className="flex items-center gap-3 mt-2 text-sm text-blue-200">
-                <span>👥 {grupo.cantidadMiembros} miembros</span>
-                <span>🔑 Código: {grupo.codigoInvitacion}</span>
-              </div>
+              <p className="text-blue-300 text-xs mt-1">
+                {grupo.cantidadMiembros}/{limiteActual} miembros
+              </p>
             </div>
           </div>
-          
           <Button
-            variant="ghost"
-            size="sm"
+            variant="ghost" size="sm"
             onClick={() => setModalInvitacion(true)}
             className="text-white border-white/30 hover:bg-white/10"
           >
-            📋 Invitar amigos
+            Invitar
           </Button>
+        </div>
+
+        {/* Código de invitación */}
+        <div className="mt-4 bg-white/10 rounded-xl px-4 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-xs text-blue-200">Código de invitación</p>
+            <p className="text-xl font-mono font-bold tracking-widest">{grupo.codigoInvitacion}</p>
+          </div>
+          <button
+            onClick={() => navigator.clipboard.writeText(grupo.codigoInvitacion)}
+            className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Copiar
+          </button>
         </div>
       </div>
 
-      {/* Ranking interno del grupo */}
-      <RankingInterno 
-        miembros={miembros} 
-        cargando={false} 
-        titulo="🏆 Ranking del grupo" 
+      {/* Banner de upgrade — solo para admin cuando el grupo está lleno y no es premium */}
+      {esAdmin && grupoLleno && !grupo.premium && (
+        <div className="flex items-center justify-between gap-3 bg-yellow-500/10 border border-yellow-500/25 rounded-xl px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-yellow-400 text-lg">⚡</span>
+            <p className="text-sm text-yellow-300">
+              Tu grupo alcanzó el límite gratuito de 5 miembros.
+            </p>
+          </div>
+          <button
+            onClick={() => setModalUpgrade(true)}
+            className="shrink-0 text-xs font-semibold bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/40 text-yellow-300 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+          >
+            Ver upgrade
+          </button>
+        </div>
+      )}
+
+      <RankingInterno miembros={miembros} cargando={false} titulo="🏆 Ranking del grupo" />
+
+      <InvitacionModal
+        grupo={grupo}
+        abierto={modalInvitacion}
+        onCerrar={() => setModalInvitacion(false)}
       />
 
-      {/* Lista de miembros */}
-      <MiembrosList miembros={miembros} />
-
-      {/* Modal de invitación */}
-      <InvitacionModal 
-        grupo={grupo} 
-        abierto={modalInvitacion} 
-        onCerrar={() => setModalInvitacion(false)} 
+      <UpgradeModal
+        abierto={modalUpgrade}
+        onCerrar={() => setModalUpgrade(false)}
+        grupoId={grupo._id}
+        grupoNombre={grupo.nombre}
+        esAdmin={esAdmin}
       />
     </div>
   );

@@ -8,11 +8,11 @@ import Button from '../components/common/Button';
 import useNotificaciones from '../hooks/useNotificaciones';
 
 const MisGrupos = () => {
-  const [grupos, setGrupos] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  const [modalCrear, setModalCrear] = useState(false);
+  const [grupos, setGrupos]       = useState([]);
+  const [cargando, setCargando]   = useState(true);
+  const [modalCrear, setModalCrear]   = useState(false);
   const [modalUnirse, setModalUnirse] = useState(false);
-  const { error } = useNotificaciones();
+  const { error }                 = useNotificaciones();
 
   const cargarGrupos = () => {
     setCargando(true);
@@ -22,19 +22,18 @@ const MisGrupos = () => {
       .finally(() => setCargando(false));
   };
 
-  useEffect(() => {
-    cargarGrupos();
-  }, []);
+  useEffect(() => { cargarGrupos(); }, []);
 
   if (cargando) return <Loading />;
 
   return (
     <div className="flex flex-col gap-5">
+
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-gray-900">👥 Mis Grupos</h1>
+        <h1 className="text-2xl font-bold text-white">👥 Mis Grupos</h1>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={() => setModalUnirse(true)}>
-            + Unirse a grupo
+            + Unirse
           </Button>
           <Button onClick={() => setModalCrear(true)}>
             + Crear grupo
@@ -42,18 +41,24 @@ const MisGrupos = () => {
         </div>
       </div>
 
+      {/* Nota discreta sobre el plan gratuito */}
+      <p className="text-xs text-gray-500 -mt-2">
+        Plan gratuito: grupos de hasta 5 miembros · 
+        <span className="text-yellow-500"> Upgrade disponible para más</span>
+      </p>
+
       {grupos.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border">
+        <div className="text-center py-12 bg-gray-800/40 border border-gray-700 rounded-xl">
           <div className="text-6xl mb-4">👥</div>
-          <p className="text-gray-500">Todavía no estás en ningún grupo</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Creá un grupo o unite a uno existente con un código de invitación
+          <p className="text-gray-400">Todavía no estás en ningún grupo</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Creá un grupo o unite a uno con un código de invitación
           </p>
         </div>
       ) : (
         <div className="grid gap-4">
-          {grupos.map((grupo) => (
-            <GrupoCard key={grupo._id} grupo={grupo} />
+          {grupos.map((g) => (
+            <GrupoCard key={g._id} grupo={g} />
           ))}
         </div>
       )}
@@ -63,7 +68,6 @@ const MisGrupos = () => {
         onCerrar={() => setModalCrear(false)}
         onGrupoCreado={cargarGrupos}
       />
-
       <UnirseGrupo
         abierto={modalUnirse}
         onCerrar={() => setModalUnirse(false)}
