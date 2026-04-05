@@ -101,7 +101,7 @@ const Dashboard = () => {
 
       {/* ── ACCESOS RÁPIDOS ── */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
           Accesos rápidos
         </h2>
         <div className="grid grid-cols-2 gap-3">
@@ -140,7 +140,7 @@ const Dashboard = () => {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">⚽ Próximos partidos</h2>
+            <h2 className="text-lg font-semibold text-white">⚽ Próximos partidos</h2>
             {fechaLabel && (
               <p className="text-xs text-gray-500 mt-0.5 capitalize">{fechaLabel}</p>
             )}
