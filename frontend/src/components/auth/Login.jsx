@@ -202,6 +202,22 @@ const Login = () => {
             </p>
           </form>
         </div>
+        {/* Tarjeta empresa */}
+        <a
+          href="https://www.latinnexo.com.ar/prode"
+          target="_blank"
+          rel="noreferrer"
+          className="mt-4 flex items-center gap-4 p-4 rounded-2xl border border-purple-500/25 bg-gradient-to-r from-purple-900/30 to-blue-900/30 hover:from-purple-900/40 hover:to-blue-900/40 transition-all duration-200 group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+            <span className="text-xl">🏢</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white">¿Tenés una empresa?</p>
+            <p className="text-xs text-gray-400 mt-0.5">Personalizá esta app para tu equipo de trabajo</p>
+          </div>
+          <span className="text-purple-400 text-sm group-hover:translate-x-1 transition-transform shrink-0">→</span>
+        </a>
       </div>
     </div>
   );
