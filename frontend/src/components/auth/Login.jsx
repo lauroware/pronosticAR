@@ -5,13 +5,142 @@ import useNotificaciones from '../../hooks/useNotificaciones';
 import Button from '../common/Button';
 import Input from '../common/Input';
 
+// Logo SVG animado — la mira aparece primero, luego se corre y aparece el texto
+const LogoAnimado = () => (
+  <svg
+    viewBox="0 0 260 90"
+    width="220"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ overflow: 'visible' }}
+  >
+    <defs>
+      <linearGradient id="lg-blue" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#60a5fa"/>
+        <stop offset="100%" stopColor="#a78bfa"/>
+      </linearGradient>
+      <linearGradient id="lg-text" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stopColor="#93c5fd"/>
+        <stop offset="100%" stopColor="#c4b5fd"/>
+      </linearGradient>
+
+      <style>{`
+        /* Mira: aparece al inicio centrada en el canvas */
+        .target-group {
+          animation: targetSlide 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+        }
+        @keyframes targetSlide {
+          0%   { transform: translateX(88px); opacity: 0; }
+          30%  { opacity: 1; }
+          100% { transform: translateX(0px); opacity: 1; }
+        }
+
+        /* Separador aparece después de que la mira llega */
+        .divider {
+          animation: fadeIn 0.4s ease 1.3s both;
+        }
+
+        /* Texto "Pronostic" */
+        .text-pronostic {
+          animation: slideText 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) 1.4s both;
+        }
+        @keyframes slideText {
+          0%   { opacity: 0; transform: translateX(-12px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Texto "AR" con leve delay */
+        .text-ar {
+          animation: slideText 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) 1.6s both;
+        }
+
+        /* Línea bajo AR */
+        .underline-ar {
+          animation: growLine 0.4s ease 2s both;
+          transform-origin: left center;
+        }
+        @keyframes growLine {
+          0%   { transform: scaleX(0); opacity: 0; }
+          100% { transform: scaleX(1); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+
+        /* Pulso sutil del punto central — loop infinito después de que todo cargó */
+        .center-dot {
+          animation: dotPulse 2.5s ease-in-out 2.4s infinite;
+        }
+        @keyframes dotPulse {
+          0%, 100% { r: 3; opacity: 0.9; }
+          50%       { r: 4.5; opacity: 0.6; }
+        }
+      `}</style>
+    </defs>
+
+    {/* ── MIRA (se anima primero, luego se corre a la izquierda) ── */}
+    <g className="target-group">
+      <circle cx="42" cy="45" r="32" fill="none" stroke="#3b82f6" strokeWidth="1" opacity="0.2"/>
+      <circle cx="42" cy="45" r="22" fill="none" stroke="#6366f1" strokeWidth="1.5" opacity="0.4"/>
+      <circle cx="42" cy="45" r="13" fill="none" stroke="#8b5cf6" strokeWidth="1.5" opacity="0.65"/>
+      <circle cx="42" cy="45" r="5"  fill="url(#lg-blue)"/>
+
+      {/* Líneas de mira */}
+      <line x1="42" y1="10" x2="42" y2="28" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+      <line x1="42" y1="62" x2="42" y2="80" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+      <line x1="8"  y1="45" x2="25" y2="45" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+      <line x1="59" y1="45" x2="76" y2="45" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+
+      {/* Punto central con pulso */}
+      <circle className="center-dot" cx="42" cy="45" r="3" fill="#ffffff" opacity="0.9"/>
+    </g>
+
+    {/* ── SEPARADOR ── */}
+    <line className="divider" x1="88" y1="22" x2="88" y2="68" stroke="#1e3a5f" strokeWidth="1"/>
+
+    {/* ── TEXTO ── */}
+    <text
+      className="text-pronostic"
+      x="100" y="40"
+      fontFamily="system-ui,-apple-system,sans-serif"
+      fontSize="22"
+      fontWeight="700"
+      fill="#ffffff"
+      letterSpacing="-0.5"
+    >
+      Pronostic
+    </text>
+    <text
+      className="text-ar"
+      x="100" y="64"
+      fontFamily="system-ui,-apple-system,sans-serif"
+      fontSize="28"
+      fontWeight="900"
+      fill="url(#lg-text)"
+      letterSpacing="-1"
+    >
+      AR
+    </text>
+
+    {/* Línea bajo AR */}
+    <line
+      className="underline-ar"
+      x1="100" y1="70" x2="135" y2="70"
+      stroke="url(#lg-blue)"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const { error } = useNotificaciones();
-  const navigate = useNavigate();
+  const [loading, setLoading]   = useState(false);
+  const { login }               = useAuth();
+  const { error }               = useNotificaciones();
+  const navigate                = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,15 +158,11 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
       <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
-            <span className="text-white text-3xl font-bold">P</span>
-          </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            PronosticAR
-          </h1>
-          <p className="text-gray-400 mt-2">Iniciá sesión para continuar</p>
+
+        {/* Logo animado */}
+        <div className="flex flex-col items-center mb-8 gap-3">
+          <LogoAnimado />
+          <p className="text-gray-400 text-sm">Iniciá sesión para continuar</p>
         </div>
 
         {/* Formulario */}
@@ -52,7 +177,6 @@ const Login = () => {
               dark
               required
             />
-
             <Input
               label="Contraseña"
               type="password"
@@ -62,17 +186,14 @@ const Login = () => {
               dark
               required
             />
-
             <div className="text-right">
               <Link to="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
-
             <Button type="submit" loading={loading} className="w-full btn-primary">
               Ingresar
             </Button>
-
             <p className="text-center text-sm text-gray-400">
               ¿No tenés cuenta?{' '}
               <Link to="/registro" className="text-blue-400 font-medium hover:text-blue-300 transition-colors">

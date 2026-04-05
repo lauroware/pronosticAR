@@ -5,8 +5,8 @@ import Button from '../common/Button';
 
 const Navbar = () => {
   const { usuario, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate            = useNavigate();
+  const location            = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -14,15 +14,17 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  // Orden pensado para UX: primero lo que el usuario hace siempre
   const menuItems = [
-    { path: '/dashboard',   emoji: '🏠', label: 'Inicio'      },
-    { path: '/partidos',    emoji: '⚽', label: 'Pronosticar' },
-    { path: '/grupos',      emoji: '👥', label: 'Mis Grupos'  },
-    { path: '/rankings',    emoji: '🏆', label: 'Ranking'     },
-    { path: '/fixture',     emoji: '📅', label: 'Fixture'     },
-    { path: '/novedades',   emoji: '📰', label: 'Novedades'   },
+    { path: '/dashboard', emoji: '🏠', label: 'Inicio'      },
+    { path: '/partidos',  emoji: '⚽', label: 'Pronosticar' },
+    { path: '/grupos',    emoji: '👥', label: 'Mis Grupos'  },
+    { path: '/rankings',  emoji: '🏆', label: 'Ranking'     },
+    { path: '/fixture',   emoji: '📅', label: 'Fixture'     },
+    { path: '/novedades', emoji: '📰', label: 'Novedades'   },
   ];
+
+  // Iniciales como fallback si no hay avatar
+  const iniciales = `${usuario?.nombre?.charAt(0) || ''}${usuario?.apellido?.charAt(0) || ''}`;
 
   return (
     <nav className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-xl border-b border-gray-800 w-full">
@@ -59,15 +61,22 @@ const Navbar = () => {
 
           {/* User section */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* Avatar — muestra foto si existe, iniciales si no */}
             <Link
               to="/perfil"
               className="hidden sm:flex items-center gap-2 px-3 py-2 bg-gray-800/50 rounded-full border border-gray-700 hover:border-gray-500 transition-colors"
             >
-              <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-medium">
-                  {usuario?.nombre?.charAt(0)}{usuario?.apellido?.charAt(0)}
-                </span>
-              </div>
+              {usuario?.avatar ? (
+                <img
+                  src={usuario.avatar}
+                  alt={usuario.nombre}
+                  className="w-7 h-7 lg:w-8 lg:h-8 rounded-full object-cover border border-gray-600"
+                />
+              ) : (
+                <div className="w-7 h-7 lg:w-8 lg:h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-medium">{iniciales}</span>
+                </div>
+              )}
               <span className="text-sm text-gray-300 hidden lg:inline">@{usuario?.username}</span>
             </Link>
 
@@ -108,6 +117,30 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-gray-800 bg-gray-900/95 backdrop-blur-xl">
           <div className="px-4 py-3 space-y-1 max-h-[80vh] overflow-y-auto">
+
+            {/* Avatar mobile en el menú */}
+            <Link
+              to="/perfil"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl mb-1 bg-gray-800/40"
+            >
+              {usuario?.avatar ? (
+                <img
+                  src={usuario.avatar}
+                  alt={usuario.nombre}
+                  className="w-10 h-10 rounded-full object-cover border-2 border-gray-600"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">{iniciales}</span>
+                </div>
+              )}
+              <div>
+                <p className="text-white text-sm font-medium">{usuario?.nombre} {usuario?.apellido}</p>
+                <p className="text-gray-400 text-xs">@{usuario?.username}</p>
+              </div>
+            </Link>
+
             {menuItems.map((item) => (
               <Link
                 key={item.path}
@@ -123,15 +156,6 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ))}
-
-            <Link
-              to="/perfil"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-400 hover:bg-gray-800/50 hover:text-white"
-            >
-              <span className="text-xl">👤</span>
-              Mi Perfil
-            </Link>
 
             {usuario?.rol === 'admin' && (
               <Link

@@ -136,6 +136,25 @@ const Dashboard = () => {
         </div>
       </div>
 
+
+      {/* ── BANNER MERCH ── */}
+      <a
+        href="https://latinmerch.com.ar"
+        target="_blank"
+        rel="noreferrer"
+        className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-600/20 to-yellow-600/20 hover:from-orange-600/30 hover:to-yellow-600/30 transition-all duration-200 hover:scale-[1.01]"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">🛍️</span>
+          <div>
+            <p className="font-bold text-white text-sm">Latin Merch</p>
+            <p className="text-xs text-white/70 mt-0.5">Merchandising corporativo · Regalos de empresa</p>
+          </div>
+        </div>
+        <span className="shrink-0 text-xs font-semibold bg-orange-500/30 border border-orange-500/40 text-orange-300 px-3 py-1.5 rounded-lg whitespace-nowrap">
+          Ver catálogo →
+        </span>
+      </a>
       {/* ── PRÓXIMOS PARTIDOS (solo la fecha más cercana) ── */}
       <div>
         <div className="flex items-center justify-between mb-3">
