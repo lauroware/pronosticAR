@@ -39,40 +39,40 @@ const Login = () => {
           </h1>
           <p className="text-gray-400 mt-2">Iniciá sesión para continuar</p>
         </div>
-        
+
         {/* Formulario */}
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-gray-700">
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <Input 
-              label="Email" 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="input-moderno"
-              required 
+              dark
+              required
             />
-            
-            <Input 
-              label="Contraseña" 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              placeholder="••••••"
-              className="input-moderno"
-              required 
+
+            <Input
+              label="Contraseña"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              dark
+              required
             />
-            
+
             <div className="text-right">
               <Link to="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
-            
+
             <Button type="submit" loading={loading} className="w-full btn-primary">
               Ingresar
             </Button>
-            
+
             <p className="text-center text-sm text-gray-400">
               ¿No tenés cuenta?{' '}
               <Link to="/registro" className="text-blue-400 font-medium hover:text-blue-300 transition-colors">

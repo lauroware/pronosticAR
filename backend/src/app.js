@@ -46,4 +46,13 @@ server.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT} [${process.env.NODE_ENV}]`);
 });
 
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://pronosticar.netlify.app',
+    'https://pronosticar.latinnexo.com.ar'  // ← agregá esta línea
+  ],
+  credentials: true
+}));
+
 module.exports = { app, server };
