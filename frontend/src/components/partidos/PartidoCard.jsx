@@ -16,16 +16,16 @@ const PartidoCard = ({ partido, miPronostico, onPronosticoGuardado }) => {
   const estaAbierto    = partido.estaAbierto && partido.estado !== 'finalizado';
   const yaPronosticado = !!miPronostico?.prediccion;
 
-  const flagLocal      = getBandera(partido.equipoLocal.codigoPais);
-  const flagVisitante  = getBandera(partido.equipoVisitante.codigoPais);
+  const flagLocal     = getBandera(partido.equipoLocal.codigoPais);
+  const flagVisitante = getBandera(partido.equipoVisitante.codigoPais);
 
   const handleGuardar = async () => {
     if (golesLocal === '' || golesVisitante === '') return error('Completá ambos marcadores');
     setLoading(true);
     try {
       const { data } = await crearPronostico({
-        partidoId: partido._id,
-        golesLocal: Number(golesLocal),
+        partidoId:      partido._id,
+        golesLocal:     Number(golesLocal),
         golesVisitante: Number(golesVisitante),
       });
       success('¡Pronóstico guardado!');
@@ -40,7 +40,8 @@ const PartidoCard = ({ partido, miPronostico, onPronosticoGuardado }) => {
 
   return (
     <>
-      <div className="bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-3 sm:p-4 hover:border-gray-600 transition-colors">
+      {/* ⚠️ NO usar backdrop-blur aquí — rompe los modales fixed */}
+      <div className="bg-gray-800 border border-gray-700 rounded-xl p-3 sm:p-4 hover:border-gray-600 transition-colors">
         <div className="flex items-center gap-2 sm:gap-3">
 
           {/* Equipo local */}
@@ -51,23 +52,19 @@ const PartidoCard = ({ partido, miPronostico, onPronosticoGuardado }) => {
             </p>
           </div>
 
-          {/* Centro: marcador / hora + pronóstico */}
+          {/* Centro: marcador / hora */}
           <div className="flex flex-col items-center min-w-[80px] sm:min-w-[96px] gap-1">
             {partido.estado === 'finalizado' ? (
               <div className="text-xl sm:text-2xl font-bold text-white tracking-widest">
                 {partido.resultado?.golesLocal} — {partido.resultado?.golesVisitante}
               </div>
             ) : (
-              <div className="bg-gray-900/70 rounded-lg px-3 py-1.5 text-center">
+              <div className="bg-gray-900 rounded-lg px-3 py-1.5 text-center">
                 <p className="text-sm font-bold text-blue-400 leading-none">
-                  {new Date(partido.fechaHora).toLocaleTimeString('es-AR', {
-                    hour: '2-digit', minute: '2-digit',
-                  })}
+                  {new Date(partido.fechaHora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {new Date(partido.fechaHora).toLocaleDateString('es-AR', {
-                    day: '2-digit', month: '2-digit',
-                  })}
+                  {new Date(partido.fechaHora).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}
                 </p>
               </div>
             )}
@@ -86,7 +83,7 @@ const PartidoCard = ({ partido, miPronostico, onPronosticoGuardado }) => {
             </p>
           </div>
 
-          {/* Botón */}
+          {/* Botón desktop */}
           {estaAbierto && (
             <Button
               size="sm"
@@ -99,7 +96,7 @@ const PartidoCard = ({ partido, miPronostico, onPronosticoGuardado }) => {
           )}
         </div>
 
-        {/* Botón mobile — ancho completo */}
+        {/* Botón mobile */}
         {estaAbierto && (
           <div className="mt-3 sm:hidden">
             <Button
@@ -123,44 +120,42 @@ const PartidoCard = ({ partido, miPronostico, onPronosticoGuardado }) => {
         )}
       </div>
 
-      {/* Modal pronóstico */}
+      {/* Modal — fuera de cualquier elemento con backdrop-filter */}
       <Modal
         abierto={modalAbierto}
         onCerrar={() => setModalAbierto(false)}
         titulo="Hacé tu pronóstico"
         size="sm"
       >
-        <div className="flex items-center gap-3 justify-center mb-6">
+        <div className="flex items-center gap-4 justify-center mb-5">
           <div className="text-center">
             <div className="text-4xl mb-1">{flagLocal}</div>
-            <p className="text-xs text-gray-400 max-w-[80px] leading-tight">{partido.equipoLocal.nombre}</p>
+            <p className="text-xs text-gray-500 max-w-[80px] leading-tight">{partido.equipoLocal.nombre}</p>
           </div>
-          <span className="text-gray-600 text-xl font-bold">vs</span>
+          <span className="text-gray-400 text-xl font-bold">vs</span>
           <div className="text-center">
             <div className="text-4xl mb-1">{flagVisitante}</div>
-            <p className="text-xs text-gray-400 max-w-[80px] leading-tight">{partido.equipoVisitante.nombre}</p>
+            <p className="text-xs text-gray-500 max-w-[80px] leading-tight">{partido.equipoVisitante.nombre}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4 justify-center">
           <Input
-            type="number"
-            min="0"
-            max="30"
+            label={partido.equipoLocal.nombre}
+            type="number" min="0" max="30"
             value={golesLocal}
             onChange={(e) => setGolesLocal(e.target.value)}
-            className="w-24 text-center"
-            dark
+            className="w-28 text-center"
+            required
           />
-          <span className="text-2xl font-bold text-gray-500">—</span>
+          <span className="text-2xl font-bold text-gray-400 mt-4">—</span>
           <Input
-            type="number"
-            min="0"
-            max="30"
+            label={partido.equipoVisitante.nombre}
+            type="number" min="0" max="30"
             value={golesVisitante}
             onChange={(e) => setGolesVisitante(e.target.value)}
-            className="w-24 text-center"
-            dark
+            className="w-28 text-center"
+            required
           />
         </div>
 

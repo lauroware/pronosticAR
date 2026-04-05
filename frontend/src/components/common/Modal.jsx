@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import Button from './Button';
 
 const Modal = ({ abierto, onCerrar, titulo, children, size = 'md' }) => {
   useEffect(() => {
@@ -21,7 +20,7 @@ const Modal = ({ abierto, onCerrar, titulo, children, size = 'md' }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className={`bg-white rounded-xl shadow-xl w-full ${sizes[size]} mx-4 overflow-hidden`}>
         <div className="flex items-center justify-between px-5 py-3 border-b">
           <h2 className="text-lg font-semibold text-gray-900">{titulo}</h2>
