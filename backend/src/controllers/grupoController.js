@@ -1,14 +1,17 @@
 const { Grupo, MiembroGrupo, RankingGrupos } = require('../models');
 
-// ========== FUNCIONES ==========
-
 // POST /api/grupos
 const crearGrupo = async (req, res, next) => {
   try {
-    const { nombre, descripcion, torneoId, limiteMembers, esPrivado } = req.body;
+    const { nombre, descripcion, torneoId, limiteMembers, esPrivado, imagen } = req.body;
     const grupo = await Grupo.create({
-      nombre, descripcion, torneo: torneoId,
-      limiteMembers, esPrivado, creador: req.usuario._id,
+      nombre,
+      descripcion,
+      torneo: torneoId,
+      limiteMembers,
+      esPrivado,
+      imagen: imagen || null,   // ← foto opcional al crear
+      creador: req.usuario._id,
     });
     await MiembroGrupo.create({ grupo: grupo._id, usuario: req.usuario._id, rol: 'admin' });
     res.status(201).json({ ok: true, data: grupo });
@@ -68,29 +71,29 @@ const getMiembros = async (req, res, next) => {
 const actualizarPersonalizacion = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { imagenPortada, avatar, colorPrimario, colorSecundario, reglas, bienvenida } = req.body;
-    
+    const { imagen, imagenPortada, colorPrimario, colorSecundario, reglas, bienvenida } = req.body;
+
     const grupo = await Grupo.findById(id);
     if (!grupo) return res.status(404).json({ ok: false, mensaje: 'Grupo no encontrado' });
-    
+
     const esAdmin = await MiembroGrupo.findOne({ grupo: id, usuario: req.usuario._id, rol: 'admin' });
     if (!esAdmin && req.usuario.rol !== 'admin') {
       return res.status(403).json({ ok: false, mensaje: 'Solo el administrador puede personalizar el grupo' });
     }
-    
+
+    // "imagen" es el campo del schema (foto principal/avatar del grupo)
+    if (imagen !== undefined)        grupo.imagen        = imagen;
     if (imagenPortada !== undefined) grupo.imagenPortada = imagenPortada;
-    if (avatar !== undefined) grupo.avatar = avatar;
     if (colorPrimario !== undefined) grupo.colorPrimario = colorPrimario;
     if (colorSecundario !== undefined) grupo.colorSecundario = colorSecundario;
-    if (reglas !== undefined) grupo.reglas = reglas;
-    if (bienvenida !== undefined) grupo.bienvenida = bienvenida;
-    
+    if (reglas !== undefined)        grupo.reglas        = reglas;
+    if (bienvenida !== undefined)    grupo.bienvenida    = bienvenida;
+
     await grupo.save();
     res.json({ ok: true, data: grupo });
   } catch (error) { next(error); }
 };
 
-// ========== EXPORTAR ==========
 module.exports = {
   crearGrupo,
   unirseAGrupo,

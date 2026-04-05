@@ -1,32 +1,143 @@
-import Loading from '../common/Loading';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { crearGrupo } from '../../services/grupoService';
+import useNotificaciones from '../../hooks/useNotificaciones';
+import Button from '../common/Button';
+import Input from '../common/Input';
+import Modal from '../common/Modal';
+import SubirImagen from '../common/SubirImagen';
+import api from '../../services/api';
 
-const RankingGrupos = ({ rankings, cargando }) => {
-  if (cargando) return <Loading />;
-  if (!rankings.length) return <div className="text-center py-8 text-gray-400">Sin datos de grupos todavía</div>;
+const CrearGrupo = ({ abierto, onCerrar, onGrupoCreado }) => {
+  const [form, setForm] = useState({
+    nombre: '',
+    descripcion: '',
+    limiteMembers: '',
+    esPrivado: true,
+    imagen: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [torneoId, setTorneoId] = useState(null);
+  const { success, error } = useNotificaciones();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (abierto && !torneoId) {
+      api.get('/torneos/activo')
+        .then(({ data }) => setTorneoId(data.data._id))
+        .catch(() => error('No se pudo obtener el torneo activo'));
+    }
+  }, [abierto, torneoId, error]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.nombre.trim()) return error('El nombre es obligatorio');
+    if (!torneoId) return error('Esperando torneo activo...');
+
+    setLoading(true);
+    try {
+      const data = {
+        nombre: form.nombre,
+        descripcion: form.descripcion,
+        torneoId,
+        limiteMembers: form.limiteMembers ? Number(form.limiteMembers) : null,
+        esPrivado: form.esPrivado,
+        imagen: form.imagen || null,
+      };
+
+      const { data: response } = await crearGrupo(data);
+      success(`Grupo "${form.nombre}" creado exitosamente`);
+      onGrupoCreado?.(response.data);
+      setForm({ nombre: '', descripcion: '', limiteMembers: '', esPrivado: true, imagen: '' });
+      onCerrar();
+      navigate('/grupos');
+    } catch (err) {
+      error(err.response?.data?.mensaje || 'Error al crear el grupo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-5 py-4 border-b bg-gray-50">
-        <h2 className="font-semibold text-gray-800">👥 Ranking entre grupos</h2>
-        <p className="text-xs text-gray-500 mt-0.5">Ordenado por promedio de puntos por miembro</p>
-      </div>
-      <div className="divide-y">
-        {rankings.map((r, i) => (
-          <div key={r._id} className="flex items-center gap-4 px-5 py-3">
-            <span className="text-lg font-bold text-gray-400 w-6">#{i + 1}</span>
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">{r.grupo?.nombre}</p>
-              <p className="text-xs text-gray-400">{r.cantidadMiembros} miembros</p>
-            </div>
-            {r.posicionAnterior && r.posicion < r.posicionAnterior && <span className="text-green-500 text-xs">▲</span>}
-            {r.posicionAnterior && r.posicion > r.posicionAnterior && <span className="text-red-400 text-xs">▼</span>}
-            <div className="text-right">
-              <p className="text-lg font-bold text-blue-700">{r.promedioPorMiembro.toFixed(1)}</p>
-              <p className="text-xs text-gray-400">pts/miembro</p>
-            </div>
+    <Modal abierto={abierto} onCerrar={onCerrar} titulo="Crear nuevo grupo" size="md">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
+        {/* Foto del grupo */}
+        <div>
+          <label className="text-sm font-medium text-gray-700 block mb-2">
+            Foto del grupo <span className="text-gray-400 font-normal">(opcional)</span>
+          </label>
+          <div className="flex items-center gap-4">
+            {form.imagen ? (
+              <img
+                src={form.imagen}
+                alt="Foto del grupo"
+                className="w-16 h-16 rounded-full object-cover border-2 border-gray-200 shadow"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-2xl">
+                👥
+              </div>
+            )}
+            <SubirImagen
+              label={form.imagen ? 'Cambiar foto' : 'Subir foto'}
+              cloudName={import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}
+              uploadPreset={import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET}
+              onUpload={(url) => setForm({ ...form, imagen: url })}
+            />
           </div>
-        ))}
-      </div>
-    </div>
+        </div>
+
+        <Input
+          label="Nombre del grupo *"
+          value={form.nombre}
+          onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+          placeholder="Ej: Amigos del Mundial"
+          required
+        />
+
+        <Input
+          label="Descripción"
+          value={form.descripcion}
+          onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+          placeholder="Descripción opcional"
+        />
+
+        <Input
+          label="Límite de miembros (opcional)"
+          type="number"
+          min="2"
+          max="200"
+          value={form.limiteMembers}
+          onChange={(e) => setForm({ ...form, limiteMembers: e.target.value })}
+          placeholder="Sin límite"
+        />
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.esPrivado}
+            onChange={(e) => setForm({ ...form, esPrivado: e.target.checked })}
+            className="w-4 h-4 text-blue-600 rounded"
+          />
+          <span className="text-sm text-gray-700">Grupo privado (solo por invitación)</span>
+        </label>
+
+        {!torneoId && (
+          <div className="bg-yellow-50 rounded-lg p-2 text-center">
+            <p className="text-xs text-yellow-600">Cargando torneo activo...</p>
+          </div>
+        )}
+
+        <div className="flex gap-2 justify-end mt-2">
+          <Button type="button" variant="ghost" onClick={onCerrar}>Cancelar</Button>
+          <Button type="submit" loading={loading} disabled={!torneoId}>
+            Crear grupo
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 };
-export default RankingGrupos;
+
+export default CrearGrupo;
