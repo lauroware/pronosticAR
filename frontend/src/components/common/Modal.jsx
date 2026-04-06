@@ -20,13 +20,28 @@ const Modal = ({ abierto, onCerrar, titulo, children, size = 'md' }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className={`bg-white rounded-xl shadow-xl w-full ${sizes[size]} mx-4 overflow-hidden`}>
-        <div className="flex items-center justify-between px-5 py-3 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">{titulo}</h2>
-          <button onClick={onCerrar} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    <div
+      className="fixed inset-0 z-50 bg-black/50"
+      style={{ overflowY: 'auto' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}
+    >
+      {/* Wrapper que centra verticalmente y permite scroll si el contenido es largo */}
+      <div className="min-h-full flex items-center justify-center p-4">
+        <div
+          className={`bg-white rounded-xl shadow-xl w-full ${sizes[size]} my-auto`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between px-5 py-3 border-b">
+            <h2 className="text-lg font-semibold text-gray-900">{titulo}</h2>
+            <button
+              onClick={onCerrar}
+              className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+            >
+              &times;
+            </button>
+          </div>
+          <div className="p-5">{children}</div>
         </div>
-        <div className="p-5">{children}</div>
       </div>
     </div>
   );
