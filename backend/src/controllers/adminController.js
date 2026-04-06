@@ -79,4 +79,33 @@ const getPartidosAdmin = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-module.exports = { getStats, getUsuarios, toggleUsuario, eliminarUsuario, cambiarRol, getPartidosAdmin };
+
+// GET /api/admin/grupos
+const getGruposAdmin = async (req, res, next) => {
+  try {
+    const { buscar } = req.query;
+    const { Grupo } = require('../models');
+    const filtro = buscar
+      ? { nombre: new RegExp(buscar, 'i') }
+      : {};
+    const grupos = await Grupo.find(filtro)
+      .populate('creador', 'username email')
+      .sort({ createdAt: -1 })
+      .limit(200);
+    res.json({ ok: true, data: grupos });
+  } catch (e) { next(e); }
+};
+
+// DELETE /api/admin/grupos/:id
+const eliminarGrupo = async (req, res, next) => {
+  try {
+    const { Grupo, MiembroGrupo } = require('../models');
+    const grupo = await Grupo.findById(req.params.id);
+    if (!grupo) return res.status(404).json({ ok: false, mensaje: 'Grupo no encontrado' });
+    await MiembroGrupo.deleteMany({ grupo: req.params.id });
+    await Grupo.findByIdAndDelete(req.params.id);
+    res.json({ ok: true, mensaje: 'Grupo eliminado' });
+  } catch (e) { next(e); }
+};
+
+module.exports = { getStats, getUsuarios, toggleUsuario, eliminarUsuario, cambiarRol, getPartidosAdmin, getGruposAdmin, eliminarGrupo };

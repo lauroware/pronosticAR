@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import DashboardAdmin from '../components/admin/DashboardAdmin';
 import GestionUsuarios from '../components/admin/GestionUsuarios';
+import GestionGrupos from '../components/admin/GestionGrupos';
 import useNotificaciones from '../hooks/useNotificaciones';
 import { cargarResultado } from '../services/partidoService';
 import Button from '../components/common/Button';
@@ -204,6 +205,7 @@ const TABS = [
   { id: 'stats',    label: '📊 Stats'    },
   { id: 'partidos', label: '⚽ Partidos' },
   { id: 'usuarios', label: '👤 Usuarios' },
+  { id: 'grupos',   label: '👥 Grupos'   },
 ];
 
 const AdminPanel = () => {
@@ -232,6 +234,7 @@ const AdminPanel = () => {
       {tab === 'stats'    && <DashboardAdmin />}
       {tab === 'partidos' && <GestionPartidosTab />}
       {tab === 'usuarios' && <GestionUsuarios />}
+      {tab === 'grupos'   && <GestionGrupos />}
     </div>
   );
 };
