@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const Modal = ({ abierto, onCerrar, titulo, children, size = 'md' }) => {
   useEffect(() => {
@@ -19,23 +20,32 @@ const Modal = ({ abierto, onCerrar, titulo, children, size = 'md' }) => {
     xl: 'max-w-4xl',
   };
 
-  return (
+  // createPortal renderiza el modal directamente en document.body
+  // sin importar dónde esté en el árbol de componentes.
+  // Esto evita que backdrop-filter, transform o z-index de ancestros
+  // afecten el posicionamiento fixed del modal.
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/50"
-      style={{ overflowY: 'auto' }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        overflowY: 'auto',
+      }}
       onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}
     >
-      {/* Wrapper que centra verticalmente y permite scroll si el contenido es largo */}
-      <div className="min-h-full flex items-center justify-center p-4">
+      <div style={{ minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
         <div
-          className={`bg-white rounded-xl shadow-xl w-full ${sizes[size]} my-auto`}
+          style={{ width: '100%', maxWidth: sizes[size].replace('max-w-', '').replace('md', '448px').replace('lg', '512px').replace('2xl', '672px').replace('4xl', '896px') }}
+          className={`bg-white rounded-xl shadow-2xl w-full ${sizes[size]}`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between px-5 py-3 border-b">
             <h2 className="text-lg font-semibold text-gray-900">{titulo}</h2>
             <button
               onClick={onCerrar}
-              className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+              className="text-gray-400 hover:text-gray-600 text-2xl leading-none w-8 h-8 flex items-center justify-center"
             >
               &times;
             </button>
@@ -43,7 +53,8 @@ const Modal = ({ abierto, onCerrar, titulo, children, size = 'md' }) => {
           <div className="p-5">{children}</div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
