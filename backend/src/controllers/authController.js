@@ -1,6 +1,8 @@
+// controllers/authController.js
 const { Usuario } = require('../models');
 const { generarToken } = require('../config/jwt');
 const crypto = require('crypto');
+const { enviarResetPassword } = require('../services/emailService'); // ← nombre correcto
 
 const PUNTOS_PUESTO = 7; // puntos por cada puesto acertado
 
@@ -62,21 +64,38 @@ const getMe = async (req, res) => {
 
 // POST /api/auth/forgot-password
 const forgotPassword = async (req, res, next) => {
-  try {
-    const usuario = await Usuario.findOne({ email: req.body.email });
-    if (!usuario) return res.json({ ok: true, mensaje: 'Si el email existe, recibirás un enlace' });
+  const { email } = req.body;
+  console.log(`[1/5] Solicitud de recuperación para: ${email}`);
 
+  try {
+    const usuario = await Usuario.findOne({ email });
+    console.log(`[2/5] Usuario encontrado: ${!!usuario}`);
+
+    // Por seguridad, siempre respondemos el mismo mensaje
+    if (!usuario) {
+      return res.json({ ok: true, mensaje: 'Si el email existe, recibirás un enlace' });
+    }
+
+    // Generar token y guardarlo (usando los campos que ya tenías)
     const token = crypto.randomBytes(32).toString('hex');
     usuario.tokenResetPassword = crypto.createHash('sha256').update(token).digest('hex');
-    usuario.tokenResetExpira   = Date.now() + 30 * 60 * 1000;
+    usuario.tokenResetExpira = Date.now() + 30 * 60 * 1000; // 30 minutos
     await usuario.save({ validateBeforeSave: false });
+    console.log(`[3/5] Token generado y guardado para ${usuario.email}`);
 
-    res.json({
-      ok: true,
-      mensaje: 'Si el email existe, recibirás un enlace',
-      _devToken: process.env.NODE_ENV === 'development' ? token : undefined,
-    });
+    // Construir URL de restablecimiento (CAMBIA ESTO por la URL real de tu frontend)
+    // Ejemplo: https://pronosticar-frontend.onrender.com/reset-password/${token}
+    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${token}`;
+    console.log(`[4/5] URL de restablecimiento: ${resetUrl}`);
+
+    // Enviar el correo usando SendGrid
+    console.log(`[5/5] Enviando email a ${usuario.email}...`);
+    await enviarResetPassword(usuario.email, token);
+    console.log(`✅ Correo enviado exitosamente a ${usuario.email}`);
+
+    res.json({ ok: true, mensaje: 'Si el email existe, recibirás un enlace' });
   } catch (error) {
+    console.error('❌ Error en forgotPassword:', error);
     next(error);
   }
 };

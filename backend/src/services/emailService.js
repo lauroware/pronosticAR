@@ -1,3 +1,4 @@
+// services/emailService.js
 const { enviarEmail } = require('../config/email');
 
 const enviarResetPassword = async (email, token) => {
