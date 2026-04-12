@@ -17,7 +17,7 @@ const enviarEmail = async ({ to, subject, html, text }) => {
     to: [{ email: to }],
     subject: subject,
     htmlContent: html,
-    textContent: text || '',
+    textContent: text || 'Restablecé tu contraseña en PronosticAR',
   };
 
   try {
