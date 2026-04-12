@@ -13,6 +13,7 @@ import AdminPanel from './pages/AdminPanel';
 import Novedades from './pages/Novedades';
 import Fixture from './pages/Fixture';
 import PagoExitoso from './pages/PagoExitoso';
+import ResetPassword from '../pages/ResetPassword'; 
 
 const AppRoutes = () => (
   <Routes>
@@ -34,6 +35,7 @@ const AppRoutes = () => (
     <Route path="/pago/exitoso"    element={<PrivateRoute><PagoExitoso /></PrivateRoute>} />
     <Route path="/pago/fallido"    element={<Navigate to="/grupos" replace />} />
     <Route path="/pago/pendiente"  element={<Navigate to="/grupos" replace />} />
+     <Route path="/reset-password/:token" element={<ResetPassword />} />
 
     <Route path="/"  element={<Navigate to="/dashboard" replace />} />
     <Route path="*"  element={<Navigate to="/dashboard" replace />} />
