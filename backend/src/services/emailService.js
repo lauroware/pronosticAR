@@ -1,5 +1,5 @@
-// services/emailService.js
 const { enviarEmail } = require('../config/email');
+
 
 const enviarResetPassword = async (email, token) => {
   const url = `${process.env.CLIENT_URL}/reset-password/${token}`;

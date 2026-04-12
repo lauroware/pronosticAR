@@ -1,38 +1,41 @@
 // config/email.js
-const brevo = require('@getbrevo/brevo');
-
-// Crear instancia de la API transaccional
-let apiInstance = new brevo.TransactionalEmailsApi();
-
-// Configurar la clave API
-apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+const axios = require('axios');
 
 const enviarEmail = async ({ to, subject, html, text }) => {
-  // Validar que la variable de entorno EMAIL_FROM esté definida
+  const apiKey = process.env.BREVO_API_KEY;
   const fromEmail = process.env.EMAIL_FROM;
+
+  if (!apiKey) {
+    throw new Error('❌ BREVO_API_KEY no está definida en Render');
+  }
   if (!fromEmail) {
-    throw new Error('La variable de entorno EMAIL_FROM no está definida en Render');
+    throw new Error('❌ EMAIL_FROM no está definida en Render');
   }
 
-  // Validar que haya al menos un contenido
-  if (!html && !text) {
-    throw new Error('Debes proporcionar html o text');
-  }
-
-  // Crear el objeto de correo
-  let sendSmtpEmail = new brevo.SendSmtpEmail();
-  sendSmtpEmail.subject = subject;
-  sendSmtpEmail.to = [{ email: to, name: to.split('@')[0] }];
-  sendSmtpEmail.htmlContent = html;
-  sendSmtpEmail.textContent = text || '';
-  sendSmtpEmail.sender = { email: fromEmail, name: 'PronosticAR' };
+  const data = {
+    sender: { email: fromEmail, name: 'PronosticAR' },
+    to: [{ email: to }],
+    subject: subject,
+    htmlContent: html,
+    textContent: text || '',
+  };
 
   try {
-    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    const response = await axios.post('https://api.brevo.com/v3/smtp/email', data, {
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+      },
+    });
     console.log(`✅ Email enviado a ${to}`);
-    return data;
+    return response.data;
   } catch (error) {
-    console.error('❌ Error enviando email con Brevo:', error.response?.body || error);
+    console.error('❌ Error enviando email con Brevo:');
+    if (error.response) {
+      console.error('   Respuesta:', error.response.data);
+    } else {
+      console.error('   Mensaje:', error.message);
+    }
     throw error;
   }
 };
