@@ -136,7 +136,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-
       {/* ── BANNER MERCH ── */}
       <a
         href="https://latinmerch.com.ar/mundial2026.html"
@@ -155,6 +154,7 @@ const Dashboard = () => {
           Ver catálogo →
         </span>
       </a>
+
       {/* ── PRÓXIMOS PARTIDOS (solo la fecha más cercana) ── */}
       <div>
         <div className="flex items-center justify-between mb-3">
@@ -183,6 +183,27 @@ const Dashboard = () => {
             ))}
           </div>
         )}
+      </div>
+
+      {/* ── CAFECITO (no invasivo, al final a la derecha) ── */}
+      <div className="mt-2 flex justify-end">
+        <a
+          href="https://cafecito.app/laurodeveloper"
+          rel="noopener noreferrer"
+          target="_blank"
+          className="inline-block transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-400 rounded-lg"
+        >
+          <img
+            srcSet="
+              https://cdn.cafecito.app/imgs/buttons/button_1.png 1x,
+              https://cdn.cafecito.app/imgs/buttons/button_1_2x.png 2x,
+              https://cdn.cafecito.app/imgs/buttons/button_1_3.75x.png 3.75x
+            "
+            src="https://cdn.cafecito.app/imgs/buttons/button_1.png"
+            alt="Invitame un café en cafecito.app"
+            className="h-10 md:h-12 w-auto"
+          />
+        </a>
       </div>
     </div>
   );
