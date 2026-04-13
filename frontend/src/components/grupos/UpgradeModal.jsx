@@ -47,7 +47,7 @@ const UpgradeModal = ({ abierto, onCerrar, grupoId, grupoNombre, esAdmin }) => {
           <div className="text-5xl mb-2">🏆</div>
           <h2 className="text-xl font-bold text-white">¡Grupo lleno!</h2>
           <p className="text-gray-400 text-sm mt-1">
-            <span className="text-white font-medium">{grupoNombre}</span> alcanzó el límite gratuito de 5 miembros.
+            <span className="text-white font-medium">{grupoNombre}</span> 
           </p>
         </div>
 

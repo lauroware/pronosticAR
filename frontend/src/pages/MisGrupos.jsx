@@ -43,8 +43,8 @@ const MisGrupos = () => {
 
       {/* Nota discreta sobre el plan gratuito */}
       <p className="text-xs text-gray-500 -mt-2">
-        Plan gratuito: grupos de hasta 5 miembros · 
-        <span className="text-yellow-500"> Upgrade disponible para más</span>
+    
+        <span className="text-yellow-500"></span>
       </p>
 
       {grupos.length === 0 ? (

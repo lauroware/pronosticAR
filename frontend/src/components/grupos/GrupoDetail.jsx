@@ -35,9 +35,7 @@ const GrupoDetail = () => {
   if (!grupo)   return <div className="text-center py-12 text-gray-400">Grupo no encontrado</div>;
 
   const esAdmin     = grupo.creador?._id === usuario?.id || grupo.rolEnGrupo === 'admin';
-  const limiteActual = grupo.premium ? 50 : 5;
-  const grupoLleno  = grupo.cantidadMiembros >= limiteActual;
-
+  
   return (
     <div className="flex flex-col gap-5">
 
@@ -101,7 +99,7 @@ const GrupoDetail = () => {
           <div className="flex items-center gap-2">
             <span className="text-yellow-400 text-lg">⚡</span>
             <p className="text-sm text-yellow-300">
-              Tu grupo alcanzó el límite gratuito de 5 miembros.
+            
             </p>
           </div>
           <button
@@ -121,14 +119,14 @@ const GrupoDetail = () => {
         onCerrar={() => setModalInvitacion(false)}
       />
 
-      <UpgradeModal
-        abierto={modalUpgrade}
-        onCerrar={() => setModalUpgrade(false)}
-        grupoId={grupo._id}
-        grupoNombre={grupo.nombre}
-        esAdmin={esAdmin}
+    //  <UpgradeModal
+       //  abierto={modalUpgrade}
+       //  onCerrar={() => setModalUpgrade(false)}
+     //    grupoId={grupo._id}
+     //    grupoNombre={grupo.nombre}
+     //    esAdmin={esAdmin}
       />
-    </div>
+    // </div>
   );
 };
 

@@ -61,7 +61,7 @@ const UnirseGrupo = ({ abierto, onCerrar, onUnido }) => {
 
           {/* Nota sobre el plan gratuito — discreta */}
           <p className="text-xs text-gray-500 text-center">
-            Los grupos gratuitos admiten hasta 5 miembros
+           
           </p>
 
           <div className="flex gap-2 justify-end mt-2">
